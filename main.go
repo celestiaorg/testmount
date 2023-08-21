@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/rand"
 	"fmt"
 	"io"
 	"os"
@@ -38,9 +39,13 @@ func Put() error {
 		buf:       bytes.NewBuffer(nil),
 		FileMount: mount.FileMount{Path: key},
 	}
-	data := []byte("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum bibendum turpis imperdiet dolor faucibus aliquet. Phasellus viverra tellus a placerat dapibus. Integer vitae dui ornare, egestas velit eget, fermentum tortor. Quisqueeget nibh id orci ultrices pulvinar. In hac habitasse platea dictumst.")
-	data = append(data, []byte{0x0a}...)
-	err = Write(data, m)
+	randomBytes := make([]byte, 1024 * 4096)
+	_, err = rand.Read(randomBytes)
+	if err != nil {
+		fmt.Println("Error generating random bytes:", err)
+		return err
+	}
+	err = Write(randomBytes, m)
 	if err != nil {
 		return fmt.Errorf("failed to write to file: %w", err)
 	}
@@ -54,7 +59,7 @@ func Put() error {
 
 func main() {
     var wg sync.WaitGroup
-    for i:=0; i < 100; i++ {
+    for i:=0; i < 2; i++ {
         wg.Add(1)
         go func() {
             if err := Put(); err != nil {
